@@ -24,6 +24,9 @@ type Holder struct {
 }
 
 func (fkdns *Holder) IsIPInIPPool(ip net.Address) bool {
+	if ip.Family().IsDomain() {
+		return false
+	}
 	return fkdns.ipRange.Contains(ip.IP())
 }
 
@@ -40,7 +43,10 @@ func (*Holder) Type() interface{} {
 }
 
 func (fkdns *Holder) Start() error {
-	return fkdns.initializeFromConfig()
+	if fkdns.config != nil && fkdns.config.IpPool != "" && fkdns.config.LruSize != 0 {
+		return fkdns.initializeFromConfig()
+	}
+	return nil
 }
 
 func (fkdns *Holder) Close() error {
@@ -139,6 +145,9 @@ type HolderMulti struct {
 }
 
 func (h *HolderMulti) IsIPInIPPool(ip net.Address) bool {
+	if ip.Family().IsDomain() {
+		return false
+	}
 	for _, v := range h.holders {
 		if v.IsIPInIPPool(ip) {
 			return true
@@ -178,9 +187,10 @@ func (h *HolderMulti) Type() interface{} {
 
 func (h *HolderMulti) Start() error {
 	for _, v := range h.holders {
-		err := v.Start()
-		if err != nil {
-			return newError("Cannot start all fake dns pools").Base(err)
+		if v.config != nil && v.config.IpPool != "" && v.config.LruSize != 0 {
+			if err := v.Start(); err != nil {
+				return newError("Cannot start all fake dns pools").Base(err)
+			}
 		}
 	}
 	return nil
@@ -188,8 +198,7 @@ func (h *HolderMulti) Start() error {
 
 func (h *HolderMulti) Close() error {
 	for _, v := range h.holders {
-		err := v.Start()
-		if err != nil {
+		if err := v.Close(); err != nil {
 			return newError("Cannot close all fake dns pools").Base(err)
 		}
 	}

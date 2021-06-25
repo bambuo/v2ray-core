@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/net/http2"
 
+	core "github.com/v2fly/v2ray-core/v4"
 	"github.com/v2fly/v2ray-core/v4/common"
 	"github.com/v2fly/v2ray-core/v4/common/buf"
 	"github.com/v2fly/v2ray-core/v4/common/net"
@@ -24,7 +25,7 @@ var (
 	globalDialerAccess sync.Mutex
 )
 
-func getHTTPClient(_ context.Context, dest net.Destination, tlsSettings *tls.Config) *http.Client {
+func getHTTPClient(ctx context.Context, dest net.Destination, tlsSettings *tls.Config) *http.Client {
 	globalDialerAccess.Lock()
 	defer globalDialerAccess.Unlock()
 
@@ -51,7 +52,8 @@ func getHTTPClient(_ context.Context, dest net.Destination, tlsSettings *tls.Con
 			}
 			address := net.ParseAddress(rawHost)
 
-			pconn, err := internet.DialSystem(context.Background(), net.TCPDestination(address, port), nil)
+			detachedContext := core.ToBackgroundDetachedContext(ctx)
+			pconn, err := internet.DialSystem(detachedContext, net.TCPDestination(address, port), nil)
 			if err != nil {
 				return nil, err
 			}
@@ -94,8 +96,22 @@ func Dial(ctx context.Context, dest net.Destination, streamSettings *internet.Me
 	opts := pipe.OptionsFromContext(ctx)
 	preader, pwriter := pipe.New(opts...)
 	breader := &buf.BufferedReader{Reader: preader}
+
+	httpMethod := "PUT"
+	if httpSettings.Method != "" {
+		httpMethod = httpSettings.Method
+	}
+
+	httpHeaders := make(http.Header)
+
+	for _, httpHeader := range httpSettings.Header {
+		for _, httpHeaderValue := range httpHeader.Value {
+			httpHeaders.Set(httpHeader.Name, httpHeaderValue)
+		}
+	}
+
 	request := &http.Request{
-		Method: "PUT",
+		Method: httpMethod,
 		Host:   httpSettings.getRandomHost(),
 		Body:   breader,
 		URL: &url.URL{
@@ -106,7 +122,7 @@ func Dial(ctx context.Context, dest net.Destination, streamSettings *internet.Me
 		Proto:      "HTTP/2",
 		ProtoMajor: 2,
 		ProtoMinor: 0,
-		Header:     make(http.Header),
+		Header:     httpHeaders,
 	}
 	// Disable any compression method from server.
 	request.Header.Set("Accept-Encoding", "identity")
