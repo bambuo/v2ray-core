@@ -5,9 +5,9 @@ import (
 	"context"
 	"math/rand"
 
-	"github.com/v2fly/v2ray-core/v4/common/errors"
-	"github.com/v2fly/v2ray-core/v4/common/net"
-	"github.com/v2fly/v2ray-core/v4/common/protocol"
+	"github.com/v2fly/v2ray-core/v5/common/errors"
+	"github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/protocol"
 )
 
 // ID of a session.
@@ -75,7 +75,7 @@ type Content struct {
 // Sockopt is the settings for socket connection.
 type Sockopt struct {
 	// Mark of the socket connection.
-	Mark int32
+	Mark uint32
 }
 
 // SetAttribute attachs additional string attributes to content.

@@ -3,7 +3,7 @@ package log
 import (
 	"sync"
 
-	"github.com/v2fly/v2ray-core/v4/common/serial"
+	"github.com/v2fly/v2ray-core/v5/common/serial"
 )
 
 // Message is the interface for all log messages.
@@ -14,6 +14,12 @@ type Message interface {
 // Handler is the interface for log handler.
 type Handler interface {
 	Handle(msg Message)
+}
+
+// Follower is the interface for following logs.
+type Follower interface {
+	AddFollower(func(msg Message))
+	RemoveFollower(func(msg Message))
 }
 
 // GeneralMessage is a general log message that can contain all kind of content.

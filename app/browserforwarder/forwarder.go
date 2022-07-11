@@ -1,5 +1,3 @@
-// +build !confonly
-
 package browserforwarder
 
 import (
@@ -12,14 +10,14 @@ import (
 
 	"github.com/v2fly/BrowserBridge/handler"
 
-	"github.com/v2fly/v2ray-core/v4/common"
-	"github.com/v2fly/v2ray-core/v4/common/net"
-	"github.com/v2fly/v2ray-core/v4/common/platform/securedload"
-	"github.com/v2fly/v2ray-core/v4/features/extension"
-	"github.com/v2fly/v2ray-core/v4/transport/internet"
+	"github.com/v2fly/v2ray-core/v5/common"
+	"github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/platform/securedload"
+	"github.com/v2fly/v2ray-core/v5/features/extension"
+	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )
 
-//go:generate go run github.com/v2fly/v2ray-core/v4/common/errors/errorgen
+//go:generate go run github.com/v2fly/v2ray-core/v5/common/errors/errorgen
 
 type Forwarder struct {
 	ctx context.Context
@@ -56,7 +54,7 @@ func (f *Forwarder) DialWebsocket(url string, header http.Header) (io.ReadWriteC
 		}
 	}
 	if unsupportedHeader {
-		return nil, newError("unsupported header used, only Sec-WebSocket-Protocol is supported for forwarder")
+		return nil, newError("unsupported header used, only Sec-Websocket-Protocol is supported for forwarder")
 	}
 	if !protocolHeader {
 		return f.forwarder.Dial(url)

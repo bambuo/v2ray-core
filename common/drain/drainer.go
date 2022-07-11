@@ -2,9 +2,8 @@ package drain
 
 import (
 	"io"
-	"io/ioutil"
 
-	"github.com/v2fly/v2ray-core/v4/common/dice"
+	"github.com/v2fly/v2ray-core/v5/common/dice"
 )
 
 type BehaviorSeedLimitedDrainer struct {
@@ -36,7 +35,7 @@ func (d *BehaviorSeedLimitedDrainer) Drain(reader io.Reader) error {
 }
 
 func drainReadN(reader io.Reader, n int) error {
-	_, err := io.CopyN(ioutil.Discard, reader, int64(n))
+	_, err := io.CopyN(io.Discard, reader, int64(n))
 	return err
 }
 

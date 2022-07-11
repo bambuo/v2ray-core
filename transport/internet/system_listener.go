@@ -4,11 +4,12 @@ import (
 	"context"
 	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/pires/go-proxyproto"
 
-	"github.com/v2fly/v2ray-core/v4/common/net"
-	"github.com/v2fly/v2ray-core/v4/common/session"
+	"github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/session"
 )
 
 var effectiveListener = DefaultListener{}
@@ -49,6 +50,9 @@ func (dl *DefaultListener) Listen(ctx context.Context, addr net.Addr, sockopt *S
 		network = addr.Network()
 		address = addr.String()
 		lc.Control = getControlFunc(ctx, sockopt, dl.controllers)
+		if sockopt != nil && sockopt.TcpKeepAliveIdle != 0 {
+			lc.KeepAlive = time.Duration(-1)
+		}
 	case *net.UnixAddr:
 		lc.Control = nil
 		network = addr.Network()
@@ -70,7 +74,7 @@ func (dl *DefaultListener) Listen(ctx context.Context, addr net.Addr, sockopt *S
 			if err != nil {
 				return nil, err
 			}
-			ctx = context.WithValue(ctx, address, locker) // nolint: golint,staticcheck
+			ctx = context.WithValue(ctx, address, locker) // nolint: revive,staticcheck
 		}
 	}
 
@@ -101,4 +105,9 @@ func RegisterListenerController(controller func(network, address string, fd uint
 
 	effectiveListener.controllers = append(effectiveListener.controllers, controller)
 	return nil
+}
+
+type SystemListener interface {
+	Listen(ctx context.Context, addr net.Addr, sockopt *SocketConfig) (net.Listener, error)
+	ListenPacket(ctx context.Context, addr net.Addr, sockopt *SocketConfig) (net.PacketConn, error)
 }

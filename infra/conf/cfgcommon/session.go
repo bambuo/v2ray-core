@@ -3,8 +3,8 @@ package cfgcommon
 import (
 	"context"
 
-	"github.com/v2fly/v2ray-core/v4/common"
-	"github.com/v2fly/v2ray-core/v4/infra/conf/geodata"
+	"github.com/v2fly/v2ray-core/v5/common"
+	"github.com/v2fly/v2ray-core/v5/infra/conf/geodata"
 )
 
 type configureLoadingContext int
@@ -24,8 +24,18 @@ func (c *configureLoadingEnvironment) GetGeoLoader() geodata.Loader {
 	return c.geoLoader
 }
 
-type ConfigureLoadingEnvironment interface {
+func (c *configureLoadingEnvironment) doNotImpl() {}
+
+type ConfigureLoadingEnvironmentCapabilitySet interface {
 	GetGeoLoader() geodata.Loader
+}
+
+type ConfigureLoadingEnvironment interface {
+	ConfigureLoadingEnvironmentCapabilitySet
+	doNotImpl()
+
+	// TODO environment.BaseEnvironmentCapabilitySet
+	// TODO environment.FileSystemCapabilitySet
 }
 
 func NewConfigureLoadingContext(ctx context.Context) context.Context {

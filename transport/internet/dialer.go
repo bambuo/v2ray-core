@@ -3,9 +3,9 @@ package internet
 import (
 	"context"
 
-	"github.com/v2fly/v2ray-core/v4/common/net"
-	"github.com/v2fly/v2ray-core/v4/common/session"
-	"github.com/v2fly/v2ray-core/v4/transport/internet/tagged"
+	"github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/session"
+	"github.com/v2fly/v2ray-core/v5/transport/internet/tagged"
 )
 
 // Dialer is the interface for dialing outbound connections.
@@ -43,6 +43,11 @@ func Dial(ctx context.Context, dest net.Destination, streamSettings *MemoryStrea
 		}
 
 		protocol := streamSettings.ProtocolName
+
+		if originalProtocolName := getOriginalMessageName(streamSettings); originalProtocolName != "" {
+			protocol = originalProtocolName
+		}
+
 		dialer := transportDialerCache[protocol]
 		if dialer == nil {
 			return nil, newError(protocol, " dialer not registered").AtError()

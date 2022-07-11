@@ -1,3 +1,4 @@
+//go:build !confonly
 // +build !confonly
 
 package dns
@@ -5,9 +6,9 @@ package dns
 import (
 	"context"
 
-	core "github.com/v2fly/v2ray-core/v4"
-	"github.com/v2fly/v2ray-core/v4/common/net"
-	"github.com/v2fly/v2ray-core/v4/features/dns"
+	core "github.com/v2fly/v2ray-core/v5"
+	"github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/features/dns"
 )
 
 type FakeDNSServer struct {
